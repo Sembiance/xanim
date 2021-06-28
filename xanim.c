@@ -50,7 +50,7 @@
  *******************************/
 
 #define DA_MAJOR_REV 2
-#define DA_MINOR_REV 80.0
+#define DA_MINOR_REV 80.2
 
 /*
  * Any problems, suggestions, solutions, anims to show off, etc contact:
