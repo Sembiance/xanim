@@ -1,2 +1,3 @@
-*.o
+quicktime4linux/src/*.o
+/*.o
 xanim
