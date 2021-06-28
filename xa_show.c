@@ -457,6 +457,7 @@ xaULONG flag;		/* override flag 0 normal 1 use pos/size */
       X11_Init_Image_Struct(theImage,xsize,ysize);
       if ( (act->chdr != 0) && (act->chdr != xa_chdr_now) )
 		XA_Install_CMAP(act->chdr);
+	  DEBUG_LEVEL2 fprintf(stderr, "XA_SHOW_IMAGE.0 Calling XPutImage\n");
       XPutImage(theDisp,mainW,theGC,theImage,0,0,xp,yp,xsize,ysize);
     }
     if(act_im_hdr->clip)
@@ -476,6 +477,7 @@ xaULONG flag;		/* override flag 0 normal 1 use pos/size */
     }
     if ( (act->chdr != 0) && (act->chdr != xa_chdr_now) )
 		XA_Install_CMAP(act->chdr);
+	DEBUG_LEVEL2 fprintf(stderr, "XA_SHOW_IMAGE.1 Calling XPutImage\n");
     XPutImage(theDisp,mainW,theGC,act_im_hdr->image, 0, 0,
 		im_xpos,  im_ypos, im_xsize, im_ysize  );
     if (act_im_hdr->clip)
@@ -562,6 +564,7 @@ xaULONG flag;		/* 0 normal 1 use pos/size */
       X11_Init_Image_Struct(theImage,xsize,ysize);
       if ( (act->chdr != 0) && (act->chdr != xa_chdr_now) )
 		  XA_Install_CMAP(act->chdr);
+	  DEBUG_LEVEL2 fprintf(stderr, "XA_SHOW_PIXMAP Calling XPutImage\n");
       XPutImage(theDisp,mainW,theGC,theImage,0,0,xp,yp,xsize,ysize);
     }
     if (act_pm_hdr->clip) 
@@ -632,6 +635,7 @@ XA_ACTION *act;
     if (ylen >= xa_buff_y) ylen1 = 0;
     else ylen1 = xa_buff_y - ylen;
 
+	DEBUG_LEVEL2 fprintf(stderr, "XA_SHOW_IMAGES Calling XPutImage\n");
     if (xlen1 == 0)
     { 
       if (ylen1 == 0)
@@ -737,6 +741,14 @@ XA_ACTION *act;
 		XA_Install_CMAP(act->chdr);
     XCopyArea(theDisp,work,mainW,theGC,0,0,xa_disp_x,xa_disp_y,0, 0);
   }
+#ifdef XA_EXPORT
+	if(export_data.export)
+	{
+		XImage * tmpImage = XGetImage(theDisp, mainW, 0, 0, xa_imagex, xa_imagey, ~0L, XYPixmap);
+		xa_export_ximage(tmpImage);
+		XDestroyImage(tmpImage);
+	}
+#endif
   AUD_SYNC_CHECK();
 }
 
@@ -1173,7 +1185,7 @@ fprintf(stderr,"WHO USES THIS???\n");
 #endif
     {
       XPutImage(theDisp,mainW,theGC,theImage,xsrc,ysrc,xdst,ydst,xsize,ysize);
-	  DEBUG_LEVEL2 fprintf(stderr, "Calling XPutImage\n");
+	  DEBUG_LEVEL2 fprintf(stderr, "XA_SHOW_DELTA Calling XPutImage\n");
     }
 #ifdef XA_EXPORT
 	if(export_data.export)
