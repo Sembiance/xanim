@@ -1,0 +1,477 @@
+Quicktime for Linux
+
+Author: Adam Williams    quicktime@altavista.net
+Homepage: heroine.tampa.fl.us/quicktime
+Requires: libjpeg.so.62
+------------------------------------------------------------------------
+
+***** 
+
+This is a Quicktime library for UNIX in a freely redistributable,
+statically linkable library.  You can statically link it in a program
+and charge money for the program.  The only condition is that if you
+use it in a program, you must put the author's name and email
+somewhere.  If you improve the library itself or add a free codec to
+it, you should release your improvements.  If you redistribute the
+code, you must also redistribute the author information and
+documentation.  At this time it's very popular to license stuff under
+the GPL.  You are free to include this library in a derived work and
+license the derived work under GPL.
+
+*****
+
+
+Quicktime movies are first and foremost a very complicated, tedious,
+wrapper for 3rd party compression schemes.
+
+Quicktime for Linux hides the nightmare of accessing a Quicktime movie
+and gives the programmer a set of audio and video streams with some
+compression ability.  The audio tracks are sequential streams of PCM
+audio data and video tracks are a sequential streams of frames.
+
+Before you drop your classes and write up your dream program on this be
+aware of some limitations.  This library doesn't give you the official
+Quicktime API even remotely.  It uses it's own threadable, scalable
+ANSI C API.  This library doesn't include any commercial codecs nor
+does it include support for keyframes, which most of the expensive
+codecs require but the free codecs don't.  Also you may encounter
+Quicktime files containing compressed headers.  This library only reads
+uncompressed headers.
+
+What you can do is create and read any Quicktime movie that uses JPEG,
+RGB, or YUV2 compression and many sound formats.  JPEG, RGB, and YUV
+4:2:2, YUV 4:2:0 encoding and decoding is currently built into the
+library.  For audio, IMA4, and ulaw encoding and decoding is in the
+library.  You can still get raw data if you want to write your own
+compression routines.
+
+Adding new codecs is hard, but if you read the section called The Story
+on Codecs and drop a few classes you can do it.
+
+/***************************************************
+ * Mandatory usage:
+ ************************************/
+
+For any operation, the first step is to #include <quicktime.h> and then
+create a pointer of type quicktime_t.
+
+	quicktime_t *file;
+
+Open the movie with the quicktime_open function.  Argument 1 is the
+path to a file.  Argument 2 is a flag for read access.  Argument 3 is a
+flag for write access.  You can specify read, read/write or write
+access by setting these flags.  Don't specify read/write mode for files
+that already exist.  Read/write mode should only be used for creating
+new files.
+
+	file = quicktime_open("test.mov", 1, 1));
+
+This returns a NULL if the file couldn't be opened or the format
+couldn't be recognized.  Now you can do all sorts of operations on the
+file.
+
+/*************************************************
+ * Reading a file:
+ **********************************/
+
+If you just want to read a file, a good place to start is before
+opening the file, making sure it is Quicktime with
+quicktime_check_sig().
+
+	quicktime_check_sig("path");
+
+This returns 1 if it looks like a Quicktime file or 0 if it doesn't. 
+Then you can open the file as above.
+
+Next get the number of tracks for each media type in the file:
+
+	int quicktime_video_tracks(quicktime_t *file);
+	int quicktime_audio_tracks(quicktime_t *file);
+
+While Quicktime can store multiple video tracks, the audio track count
+is a bit more complicated.  In addition to the track count, Quicktime
+can store multiple audio channels for each audio track so you have to
+count those too, for each track.
+
+	int quicktime_track_channels(quicktime_t *file, int track);
+
+Tracks are numbered from 0 to the total number of audio tracks - 1. 
+The library doesn't handle any extraction of channels from each track. 
+It just reads raw track data.  For each audio track, other routines you
+might find useful for getting information are:
+
+	int quicktime_audio_bits(quicktime_t *file, int track);
+	long quicktime_sample_rate(quicktime_t *file, int track);
+	long quicktime_audio_length(quicktime_t *file, int track);
+	char* quicktime_audio_compressor(quicktime_t *file, int track);
+
+quicktime_audio_length gives you the total number of samples in a given
+track regardless of the channels or bitrate.  The sample rate is
+samples per second.  The audio compressor routine returns a 4 byte
+array identifying the compression of the track.
+
+The available video information for each video track is:
+
+	long quicktime_video_length(quicktime_t *file, int track);
+	int quicktime_video_width(quicktime_t *file, int track);
+	int quicktime_video_height(quicktime_t *file, int track);
+	float quicktime_frame_rate(quicktime_t *file, int track);
+	char* quicktime_video_compressor(quicktime_t *file, int track);
+	long quicktime_frame_size(quicktime_t *file, long frame, int track);
+
+Tracks are numbered 0 to the total number of tracks - 1.  The video
+length is in frames.  The width and height are in pixels.  The frame
+rate is in frames per second.  The video compressor is a four byte
+array containing one of Quicktime's video data format types.  More on
+these later.
+
+Unless you get a really nihilistic file for reading, you can safely
+assume the encoding scheme for track 0 of audio or video is the same
+for all tracks of that media type.  That's what the encoders do.
+
+/********************************************
+ * Compressor types
+ **********************/
+
+The output of the compressor queries is a 4 byte array that matches one
+of the compressor #defines in quicktime.h.  The current audio
+compressor #defines are:
+
+	QUICKTIME_RAW
+	QUICKTIME_TWOS
+	QUICKTIME_IMA4
+	QUICKTIME_ULAW
+
+Several video codecs are built into the library.  The current video
+compressor #defines (which also indicate the codecs built into the
+library) are.
+
+	QUICKTIME_RAW
+	QUICKTIME_JPEG
+	QUICKTIME_YUV2
+	QUICKTIME_YUV4
+
+the YUV4 being especially notable.  YUV2 is 2 chroma components for
+every 2 pixels giving a 1.5:1 compression while YUV4 is 2 chroma
+components for every 4 pixels, giving a 2:1 compression with virtually
+no distortion.  YUV4 is not supported by Quicktime for Windows or Mac. 
+Once you have the compression information, you can begin reading data.
+
+/*************************************************
+ * Seeking around a file
+ *************************/
+
+The current position of each track is independant of each other track
+and advances automatically when you read from it.  Speaking of
+positions, you can also set each track's position arbitrarily with
+
+	int quicktime_seek_end(quicktime_t *file);
+	int quicktime_seek_start(quicktime_t *file);
+	int quicktime_set_audio_position(quicktime_t *file, long sample, int track);
+	int quicktime_set_video_position(quicktime_t *file, long frame, int track);
+
+The seek_end and seek_start seek all tracks to their ends or starts. 
+The set_position commands seek one track to the desired position.
+
+When seeking around audio tracks, be aware that Quicktime for Linux
+tries to guess the byte offset of the sample position by the codec
+type, so attempts to seek an unsupported nonlinear codec will fail.
+
+When you're done reading, call quicktime_close(quicktime_t *file);
+
+	int quicktime_read_frame(quicktime_t *file, unsigned char *video_buffer, int track);
+	int quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, int track);
+
+/**************************************************
+ * Reading raw audio data
+ *************************/
+
+These commands are good for reading raw sample data.  They should only
+be used for codecs not supported in the library and only work for
+interleaved, linear PCM data.
+
+quicktime_read_audio requires a number of samples of raw audio data to
+read.  Then it reads that corresponding number of bytes on the
+specified track and returns the equivalent number of bytes read or 0 if
+error.  The data read is PCM audio data of interleaved channels
+depending on the format of the track.
+
+Be aware that Quicktime for Linux tries to guess the number of bytes by
+the codec type, so attempts to read most nonlinear codecs will crash.
+
+/***************************************************
+ * Reading raw video data
+ *************************/
+
+quicktime_read_frame reads one frame worth of raw data from your
+current position on the specified video track and returns the number of
+bytes in the frame.  You have to make sure the buffer is big enough for
+the frame.   A return value of 0 means error.
+
+	long quicktime_frame_size(quicktime_t *file, long frame, int track);
+
+gives up the number of bytes in the specified frame in the specified
+track even if you haven't read the frame yet.  Frame numbers start on
+0.
+
+Now some of you are going to want to read frames directly from a file
+descriptor using another library like libjpeg or something.  To read a
+frame directly start by calling quicktime_read_frame_init to initialize
+the input.
+
+	int quicktime_read_frame_init(quicktime_t *file, int track);
+
+Then read your raw, compressed data from the file descriptor given by
+quicktime_get_fd.
+
+	FILE* quicktime_get_fd(quicktime_t *file);
+
+End the frame by calling quicktime_read_frame_end.
+
+	int quicktime_read_frame_end(quicktime_t *file, int track);
+
+You can get the file descriptor any time the file is opened, not just
+when reading or writing, but you must call the init and end routines to
+read a frame.
+
+/***************************************************
+ * Codec support for reading video:
+ ********************************/
+
+In addition to raw frame data, you can have the library decode
+compressed video frames into rows of unsigned RGB bytes.  First use
+
+	int quicktime_supported_video(quicktime_t *file, int track);
+
+to find out if the codec for the track is in the library.  This returns
+1 if it is and 0 if it isn't supported.
+
+Then use
+
+	int quicktime_decode_video(quicktime_t *file, unsigned char **row_pointers, int track);
+
+to decompress a frame at the current position of the track into
+**row_pointers and advance the current position.
+
+/*************************************************
+ * Codec support for reading audio:
+ ********************************/
+
+For reading audio, first use:
+
+int quicktime_supported_audio(quicktime_t *file, int track);
+
+To determine if the codec can be read by the library.  This returns 1
+if it is and 0 if it isn't supported.
+
+Then use
+
+	int quicktime_decode_audio(quicktime_t *file, QUICKTIME_INT16 *output_i, float *output_f, long samples, int channel);
+
+To read a buffer of samples for a single channel starting at the
+current position in the file.  Notice this command takes a channel
+argument not a track argument.  The channel is automatically resolved
+into a track # and a channel # in that track for reading.  Positioning
+information is automatically taken from the appropriate track.
+
+Notice the QUICKTIME_INT16* and float* parameters.  This call can
+either return int16 samples or float samples.  The argument for the
+data format you want should be passed a preallocated buffer big enough
+to contain the sample range.  For a buffer of float samples you would
+say
+
+	result = quicktime_decode_audio(file, NULL, output_f, samples, channel);
+
+For a buffer of int16 samples you would say
+
+	result = quicktime_decode_audio(file, output_i, NULL, samples, channel);
+
+The data format you don't want should be passed a NULL.  The decoder
+automatically fills the appropriate buffer.  Floating point samples are
+from 0 to 1.
+
+/***************************************************
+ * Writing a file:
+ **********************************/
+
+The following commands are good for writing to a file.
+
+Immediately after opening the file, set up the tracks to write with
+these commands:
+
+	quicktime_set_audio(quicktime_t *file, int channels, long sample_rate, int bits, char *compressor);
+	quicktime_set_video(quicktime_t *file, int tracks, int frame_w, int frame_h, float frame_rate, char *compressor);
+
+Notice the channels argument for audio channels but there is no
+argument for total audio tracks. For sanity reasons, the library only
+supports writing one audio track of any number of channels.
+
+The compressor string can be one of the compressor #defines in
+quicktime.h or your own 4 byte array and applies to all tracks of the
+media type, for simplicity reasons.  Choose an audio compressor for the
+audio command and a video compressor for the video command.  The
+library doesn't check for conflicting media types or whether a
+compressor you make up is legitimate.
+
+The IMA4 compressor is preferred for audio and YUV2 is preferred for
+video.  IMA4 was really a great idea designed into sucking because of 8
+bits, another example of credentials over brain power.
+
+Now you'll want to seek to any point in the file.  Seeking works
+exactly as in reading, using the same commands, except if you seek to
+the middle of a file and write out data, you're going to cause a glitch
+in the playback data.  It's virtually impossible to line up new frame
+boundaries with old frames since some codecs aren't linear and hardly
+anyone uses this library anyway.
+
+/****************************************************
+ * Writing raw data
+ ***********************/
+
+With that, you can now write data.  For writing raw frame data, you
+need to supply a buffer of data exactly as you intend
+quicktime_read_... to see it, with the encoding done, then call one of
+these functions to write it.  For video, specify the number of bytes in
+the frame buffer and the track this frame belongs to.  Video can only
+be written one frame at a time.
+
+	int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, long bytes, int track);
+
+Writing audio involves writing the raw audio data exactly the way
+quicktime_read_audio is going to see it, with channels interleaved and
+whatever else.
+
+	int quicktime_write_audio(quicktime_t *file, char *audio_buffer, long samples, int track);
+
+The library automatically converts the sample count to the number of
+bytes of data in the buffer, based on channels and bits values you
+passed to quicktime_set_audio.
+
+Now some of you are going to want to write frames directly to a file
+descriptor using another library like libjpeg or something.  For every
+frame start by calling quicktime_write_frame_init to initialize the
+output.
+
+	int quicktime_write_frame_init(quicktime_t *file, int track);
+
+Then write your raw, compressed data to the file descriptor given by
+quicktime_get_fd.
+
+	FILE* quicktime_get_fd(quicktime_t *file);
+
+End the frame by calling quicktime_write_frame_end.
+
+	int quicktime_write_frame_end(quicktime_t *file, int track);
+
+When you're done, call quicktime_close to close the file.
+
+	int quicktime_close(file);
+
+
+Repeat starting at quicktime_write_frame_init for every frame.
+
+/*********************************************************
+ * Codec support for writing:
+ **********************************/
+
+In addition to raw frame data, you can have the library encode
+compressed video frames from rows of unsigned RGB bytes.  This depends
+on whether the compressor you passed to quicktime_set_video is
+supported in the library.  First use
+
+	int quicktime_supported_video(quicktime_t *file, int track);
+
+to find out if the codec for the track is in the library.  This returns
+1 if it is and 0 if it isn't supported.
+
+Then use
+
+	int quicktime_encode_video(quicktime_t *file, unsigned char **row_pointers, int track);
+
+to compress the frame pointed to by **row_pointers, write it at the
+current position of the track and advance the current position.  There
+is no audio encoding currently.  The return value is always 1 for
+failure and 0 for success.
+
+The library also supports encoding certain audio codecs.  Before
+writing a buffer of samples, try 
+
+	int quicktime_supported_audio(quicktime_t *file, int track);
+
+The track argument is really hypothetical here, since you should only
+pass 0 for it.  If the codec is supported, use 
+
+	int quicktime_encode_audio(quicktime_t *file, QUICKTIME_INT16 **input_i, float **input_f, long samples);
+
+To encode the sample buffer.  Pass an array of buffers to either the
+QUICKTIME_INT16** or the float** argument, depending on what format
+your data is in.  Pass a NULL to the unused argument.  The array of
+buffers is one buffer of samples for each channel, all pointed to by an
+array.  This means all the channels have to be written simultaneously. 
+The return value is 0 on success.
+
+
+/*********************************************************
+ * Other functions:
+ **************************************/
+
+You can get some utilities by running make util in the source code
+directory.  The dump program merely reads the salient features of a
+header from a quicktime file and dumps it in english to the screen.  As
+you can see, there's a reason why no-one's written Quicktime libraries
+for Linux yet.  Eventually this library may allow you to access the
+extra information.
+
+Web authors might find a use for make_streamable.  This makes a
+Quicktime file readable before it's completely downloaded by relocating
+the header.  Only use it on files created by this library since it
+might clobber any other files.
+
+/*******************************************************
+ * Bugs:
+ ****************************************/
+
+Lots.
+
+/*******************************************************
+ * The story on codecs
+ ****************************************/
+
+Quicktime for Linux was originally intended as a back end to a higher
+level library which would contain all the codecs.  Later on some guy
+decided to move some codecs into the Quicktime library itself.
+
+Well we're now shooting for a compromise between building codecs
+directly in the library and using the library as a back end to a plugin
+architecture.  Unpatented, and freely redistributable codecs should be
+built into Quicktime for Linux while patented and expensive codecs
+should go into a higher level library.  A user application who wants to
+access a movie then queries Quicktime 4 Linux followed by whatever
+codec libraries are available until one rings positive.
+
+If you want to code into the Quicktime library itself, codecs have so
+far been implemented thus:
+
+1) Add the #define for the codec ID to quicktime.h.
+2) Go to codecs.c and edit the supported_**** to return the right value.
+3) Go to codecs.h and add a codec structure to quicktime_codecs_t.
+4) Include a .h file for the codec in codecs.h.
+5) Create the .h file for your codec to define the codec structure.
+6) Add switch conditions to codecs.c.
+7) Define the init, delete, encode, and decode routines in a new .c
+file for the codec using one of the existing codecs as a template. 
+Codec .c files are currently named by the ID of the codec.
+9) Add the new object file to Makefile
+
+
+/*******************************************************
+ * References:
+ *********************************/
+
+Apple's quicktime file format information:
+
+http://developer.apple.com/techpubs/quicktime/qtdevdocs/REF/refQTFileFormat.htm
+
+Color space conversions:
+
+http://www.neuro.sfc.keio.ac.jp/~aly/polygon/info/color-space-faq.html

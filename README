@@ -1,0 +1,208 @@
+
+
+Welcome to XAnim Revision 2.80.1
+
+This readme file covers some important topics in addition to describing
+what all is contain in this archive.
+
+You can also visit the XAnim Home Pages:
+
+        http://xanim.va.pubnix.com/home.html
+        http://smurfland.cit.buffalo.edu/xanim/home.html
+	http://xanim.resnet.gatech.edu/home.html
+	http://www.tm.informatik.uni-frankfurt.de/xanim/
+
+1) CopyRight/Disclaimer
+ 
+   XAnim Copyright (C) 1990-1999 by Mark Podlipec.  All rights reserved.
+ 
+   This software may be freely used, copied and redistributed without
+   fee for non-commerical purposes provided that this copyright notice is
+   preserved intact on all copies.
+ 
+   There is no warranty or other guarantee of fitness of this software.
+   It is provided solely "as is". The author(s) disclaim(s) all
+   responsibility and liability with respect to this software's usage
+   and its effect upon hardware or computer systems.
+
+
+2) But Is It Free?
+
+   Yes, for non-commercial use. No money, donations, etc are required.
+
+   However, I do collect coins from around the World, so if you use
+   and like XAnim and want to help motivate me to put more effort
+   into it, you can send whatever coins you feel like donating to:
+
+		Mark Podlipec
+		15 Meadow Lane
+		Shrewsbury MA 01545 USA
+
+   Doesn't matter what the value or condition they are in. However,
+   since I do have the majority of the 20th century US coins, I'm not
+   as interested in them. Again, this is strictly voluntary.
+   You can see the collection by visting:
+
+	http://home.ici.net/~podlipec/coins.html
+	
+
+   For commercial use, a licensing agreement is required.  You
+   may send enquiries to:
+
+			podlipec@ici.net
+
+
+3) Now What?
+
+   XAnim is distributed as source code and needs to be compiled on
+   your machine before you'll be able to use it.   You'll need to
+   have the following installed on your machine:
+
+		C compiler 
+		X11 includes
+		X11 libraries
+
+   1) Read through the "README.dll" file.
+
+   2) Read through the "README.zlib" file.
+
+   3) Read through the README.* file that corresponds to the type
+      of machine that you have. For example, README.sunos
+
+   4) Now read the "Compile_Help.doc" file provides step by step 
+      instructions on how to compile XAnim on unix machines.
+
+   If you have a VMS machine, please see the "VMS_Help.doc" file. I
+   apologize that the VMS instructions aren't as detailed, but
+   I don't know much about that OS, yet.
+
+   The "Compile_Errs.doc" file contains common compile errors and their
+   solutions. 
+
+   The "Problems.doc" file describes common warning and error messages
+   that you might encounter while running XAnim.
+
+   The "audio.readme" contains machine specific audio information.
+   This file is slowly being rolled up into the specific readmes.
+
+   The file "Examples.doc" gives some common usage examples on running
+   xanim. The "xanim.readme" or "xanim.man" page contians much more
+   detailed description of all the options and has sections describing
+   various features in depth.
+
+
+3) What are all these other files?
+
+   This archive contains the source to XAnim(all the .xbm, .h and .c files)
+   and needs to be compiled on your machine in order to produce an
+   XAnim executable. Below is a list and brief description of all
+   the files in this archive.
+
+        ---------------------------------
+	README			-This file
+        ---------------------------------
+	buttons/*.xbm		-These files are bitmaps for the Remote Control.
+	*.h			-These are part of the XAnim source code.
+	*.c			-These are part of the XAnim source code.
+	Imakefile		-This file is used to compile XAnim on machines
+				 that have Imake setup correctly. 
+				 see "Compile_Help.doc" for more info.
+	Makefile.unx 		-This file is used to compile XAnim on machines
+				 that don't have Imake setup correctly.
+				 see "Compile_Help.doc" for more info.
+        ---------------------------------
+	xanim.readme		-This is a text file describing all the options
+				 and functionality of XAnim.
+	xanim.man		-This is the unix man page equivalent of the
+				 xanim.readme file.
+	audio.readme		-Machine Specific Audio information.
+	cinepak.readme		-This file describes how to add support for
+				 the Radius Cinepak Video Codec to XAnim.
+	indeo.readme		-This file describes how to add support for
+				 the Radius Cinepak Video Codec to XAnim.
+        ---------------------------------
+	Compile_Help.doc	-Step by step instructions for compiling XAnim.
+	Compile_Errs.doc	-Common compile errors and solutions.
+	Problems.doc		-Common Error and Warning messages.
+	Audio_Checklist.doc	-A Chart of which Audio Codecs work with which
+				 hardware platform
+	Formats.doc		-Detailed list of all the formats that
+				 XAnim supports.
+	Codecs.doc		-List of Quicktime and AVI Video and Audio
+				 that I know about.
+	Rev_History.doc		-Revision history of XAnim.
+        WWW_Helper.doc		-Getting WWW Browsers to work with XAnim.
+        ---------------------------------
+	VMS_Help.doc		-Help file for VMS users.
+	make.com		-This file is used to compile XAnim on
+				 some VMS systems. See vms.help for more info.
+	descrip.mms		-This file is used to compile XAnim on
+				 some VMS systems. See vms.help for more info.
+        ---------------------------------
+	ijg.readme		-Since I based the XAnim JPEG code on the IJG
+				 jpeg code, I need to distribute this file.
+
+4) If you have a problem running or compiling that the documentation
+   doesn't cover or if you find a bug  you can contact me at:
+
+		podlipec@ici.net
+
+   Please include the following information in your email message:
+
+	1) The rev of XAnim.
+	2) Type of machine and OS.
+	3) A description of the problem:
+		+ including the type of animation.
+	   	+ any options used.
+		+ full error messages and/or xanim output.
+
+5) XAnim Mailing List
+
+   I have an announcement email list that you may join if you wish
+   to get email when there are new XAnim releases.
+
+   To Subscribe/Unsubscribe send email to:
+
+           podlipec@ici.net
+
+   with the words "xanim subscribe" or "xanim unsubscribe" in either the
+   Subject or Message Body. It would also be best to include
+   your email address since I've found a lot of mailer's do not
+   include the correct reply address in the mail headers.
+
+   Unfortunately, this part of the list maintenance isn't automated yet, so 
+   bare with me as I usually only make the additions before each new
+   XAnim releases.
+
+   Bug reports should still be sent to:
+
+           podlipec@ici.net
+
+   I do attempt to reply to all the email messages I receive, however, I get
+   quite a few with invalid return addresses. If you don't hear from me
+   within a week, double check that your return address is correct.
+
+
+6) Alright, What's New?  The Rev_History.doc should/will/has a complete
+   list of what's new to this particular revision, but this section
+   will list just the highlights.
+
+-------------------------------------------------------------------------
+2.80.0
+-------------------------------------------------------------------------
+  + Added support for the following AVI codecs:
+	DMB1,BW10,Y41P,I420,VYUY,V422,YV12,Y41P,YUY2,IV41,IV50,H261,M263
+  + Added support for the following QT codecs:
+	MJPA, 8BPS, IV41, IV50
+  + Added support for QT3.0 compressed headers.
+  + Added support for video decompression dlls.
+  + Fixed problems with X11 remote displays of different endianness.
+  + Minor bugs fixes.
+
+
+
+Mark
+--
+Mark Podlipec
+podlipec@ici.net
+

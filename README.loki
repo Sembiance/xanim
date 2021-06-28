@@ -1,0 +1,33 @@
+
+Loki Entertainment Software README
+----------------------------------
+http://www.lokigames.com/
+----------------------------------
+
+This is an extension of the original exporting version of xanim,
+written by Mark Podlipec and modified for export by Adam Williams.
+
+In addition to quicktime export, this version also exports JPEG and
+PPM frames, along with 16-bit mono audio streams.
+
+Usage:
+First create an "input" directory for the exported frames
+
+To export JPEG frames compressed at 80% quality:
+
+	xanim +v +Eq80 file.avi
+
+To export PPM frames:
+
+	xanim +v +Ee file.avi
+
+To export raw 16-bit mono audio:
+
+	xanim +v +Ea file.avi
+
+We use this tool to create Motion JPEG movies for our games!
+
+We hope that you find it useful as well. :)
+
+--Sam Lantinga, Lead Programmer, Loki Entertainment Software
+

@@ -1,0 +1,16 @@
+#ifndef QUICKTIME_WMX1_H
+#define QUICKTIME_WMX1_H
+
+typedef struct
+{
+	unsigned char *key_frame;
+	unsigned char *key_mask;
+	unsigned char *new_frame;
+	long keyframe_position;
+	long newframe_position;
+	int quality;
+	int use_float;
+	int threshold;
+} quicktime_wmx1_codec_t;
+
+#endif

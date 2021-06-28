@@ -1,0 +1,4 @@
+#!/bin/sh
+#
+# Script to turn xanim raw audio output into a WAV file
+sox -r 22050 -c 1 -w -s audio.raw audio.wav
